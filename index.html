@@ -27,7 +27,6 @@
         .container {
             display: flex;
             width: 100%;
-            max-width: 1200px;
             height: 100vh;
         }
 
@@ -46,18 +45,23 @@
         }
 
         .label {
-            font-size: 1rem;
+            font-size: 1.5rem;
             color: var(--label-color);
             text-transform: uppercase;
             letter-spacing: 0.1em;
-            margin-bottom: 1rem;
+            margin-bottom: 2vh;
+            font-weight: bold;
         }
 
-        .time-display {
-            font-size: 6rem;
+        /* Using viewport width (vw) units ensures the text 
+           is always massive relative to the screen size 
+        */
+        .big-text {
+            font-size: 12vw; 
             font-weight: 700;
-            font-variant-numeric: tabular-nums; /* Prevents jitter when numbers change */
+            font-variant-numeric: tabular-nums;
             line-height: 1;
+            white-space: nowrap;
         }
 
         /* Left Side Styles */
@@ -65,30 +69,37 @@
             color: var(--text-cyan);
         }
 
-        /* Right Side Styles */
-        #target-input {
+        /* Right Side Wrapper to hold Input + Static Seconds */
+        .input-wrapper {
+            display: flex;
+            align-items: center;
             color: var(--text-yellow);
-            background: transparent;
-            border: none;
-            font-family: var(--font-stack);
-            font-size: 6rem;
-            font-weight: 700;
-            width: 5ch; /* Exact width for HH:MM */
-            text-align: center;
-            outline: none;
-            caret-color: var(--text-yellow); /* Cursor matches text */
         }
 
-        /* Remove default placeholders styling if needed */
-        ::placeholder { 
-            color: #444; 
-            opacity: 1; 
+        #target-input {
+            color: inherit; /* Inherits yellow */
+            background: transparent;
+            border: none;
+            font-family: inherit;
+            font-size: inherit;
+            font-weight: inherit;
+            width: 2.6ch; /* Width for HH:MM */
+            text-align: right;
+            outline: none;
+            caret-color: var(--text-yellow);
+            padding: 0;
+            margin: 0;
+        }
+        
+        .static-seconds {
+            opacity: 0.7; /* Slightly dimmer to indicate it's not editable */
         }
 
         @media (max-width: 800px) {
             .container { flex-direction: column; }
             .panel:first-child { border-right: none; border-bottom: 1px solid #333; }
-            .time-display, #target-input { font-size: 4rem; }
+            .big-text { font-size: 18vw; } /* Even bigger on mobile */
+            #target-input { width: 2.7ch; }
         }
     </style>
 </head>
@@ -97,19 +108,21 @@
 <div class="container">
     <div class="panel">
         <div class="label">Current Time</div>
-        <div id="current-time" class="time-display">00:00:00</div>
+        <div id="current-time" class="big-text">00:00:00</div>
     </div>
 
     <div class="panel">
         <div class="label">Target Time</div>
-        <input type="text" id="target-input" value="16:30" maxlength="5" placeholder="--:--">
+        <div class="input-wrapper big-text">
+            <input type="text" id="target-input" value="16:30" maxlength="5" placeholder="--:--">
+            <span class="static-seconds">:00</span>
+        </div>
     </div>
 </div>
 
 <script>
     /* -----------------------------------------------------------
        1. CLOCK LOGIC
-       Updates the left side every second with 24h format
     ----------------------------------------------------------- */
     function updateClock() {
         const now = new Date();
@@ -119,33 +132,25 @@
         
         document.getElementById('current-time').textContent = `${hours}:${minutes}:${seconds}`;
     }
-
-    // Run immediately, then every second
     updateClock();
     setInterval(updateClock, 1000);
 
-
     /* -----------------------------------------------------------
        2. INPUT MASKING LOGIC
-       Handles the right side input to ensure strict HH:MM format
-       and auto-insertion of the colon.
     ----------------------------------------------------------- */
     const input = document.getElementById('target-input');
 
     input.addEventListener('input', function(e) {
-        // Remove non-numeric characters
         let val = e.target.value.replace(/[^0-9]/g, '');
         
-        // Auto-insert colon after 2 digits
+        // Auto-insert colon
         if (val.length > 2) {
             val = val.slice(0, 2) + ':' + val.slice(2);
         }
         
-        // Limit total length to 5 chars (HH:MM)
         e.target.value = val.slice(0, 5);
     });
 
-    // Validation on blur (clicking away) to ensure valid 24h time
     input.addEventListener('blur', function(e) {
         let val = e.target.value;
         if (val.length === 5 && val.includes(':')) {
@@ -153,11 +158,9 @@
             let h = parseInt(parts[0]);
             let m = parseInt(parts[1]);
 
-            // Clamp hours to 0-23 and minutes to 0-59
             if (h > 23) h = 23;
             if (m > 59) m = 59;
 
-            // Reformat with padding
             e.target.value = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
         }
     });
