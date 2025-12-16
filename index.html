@@ -61,7 +61,7 @@
             text-transform: uppercase;
             letter-spacing: 0.15em;
             font-weight: 600;
-            margin: 0 0 2rem 0; /* Added spacing */
+            margin: 0 0 2rem 0; 
         }
 
         /* Time Container handles the flex alignment of Big Time + Small Seconds */
@@ -104,13 +104,10 @@
             margin: 0;
         }
 
-        .helper-text {
-            position: absolute;
-            bottom: 2rem;
-            color: var(--text-dim);
-            font-family: var(--font-mono);
-            font-size: 0.75rem;
-            opacity: 0.7;
+        /* Placeholder styling to ensure it looks subtle */
+        ::placeholder {
+            color: var(--text-gold);
+            opacity: 0.3;
         }
 
         /* Custom Blinking Cursor */
@@ -155,14 +152,12 @@
                 type="text" 
                 id="target-input" 
                 class="time-main"
-                value="16:30" 
+                value="" 
                 maxlength="5" 
                 placeholder="--:--"
             />
             <span class="time-seconds">:00</span>
         </div>
-        
-        <div class="helper-text">[Type HHMM]</div>
     </div>
 
     <script>
@@ -177,9 +172,8 @@
             const minutes = String(now.getMinutes()).padStart(2, '0');
             const seconds = String(now.getSeconds()).padStart(2, '0');
             
-            // Update the two separate parts
             document.getElementById('clock-main').textContent = `${hours}:${minutes}`;
-            document.getElementById('clock-seconds').textContent = seconds; // Removed colon for cleaner look
+            document.getElementById('clock-seconds').textContent = seconds; 
         }
         
         updateClock();
