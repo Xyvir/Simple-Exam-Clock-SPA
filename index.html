@@ -9,7 +9,7 @@
     
     <style>
         :root {
-            /* The Slate Color Palette (Exact match to previous theme) */
+            /* Colors */
             --bg-darker: #020617;  /* slate-950 */
             --bg-dark:   #0f172a;  /* slate-900 */
             --border:    #1e293b;  /* slate-800 */
@@ -34,7 +34,7 @@
             display: flex;
         }
 
-        /* Layout Structure */
+        /* Layout */
         .panel {
             flex: 1;
             display: flex;
@@ -51,7 +51,7 @@
         }
 
         .panel-right {
-            background-color: var(--bg-dark); /* Slightly lighter for contrast */
+            background-color: var(--bg-dark);
         }
 
         /* Typography */
@@ -61,27 +61,34 @@
             text-transform: uppercase;
             letter-spacing: 0.15em;
             font-weight: 600;
-            margin: 0 0 1rem 0;
+            margin: 0 0 2rem 0; /* Added spacing */
         }
 
-        .clock-digits {
+        /* Time Container handles the flex alignment of Big Time + Small Seconds */
+        .time-container {
+            display: flex;
+            align-items: baseline; /* Ensures numbers sit on same line */
             font-family: var(--font-mono);
             font-weight: 700;
-            font-size: 8rem; /* Big desktop size */
-            line-height: 1;
             font-variant-numeric: tabular-nums;
-            white-space: nowrap;
+            line-height: 1;
+        }
+
+        /* The Big Numbers (HH:MM) */
+        .time-main {
+            font-size: 8rem; 
+        }
+
+        /* The Small Seconds (SS) */
+        .time-seconds {
+            font-size: 4rem; /* Half the size of main time */
+            margin-left: 0.1ch;
         }
 
         .text-cyan { color: var(--text-cyan); }
         .text-gold { color: var(--text-gold); }
 
         /* Input Styling */
-        .input-wrapper {
-            display: flex;
-            align-items: center;
-        }
-
         input {
             background: transparent;
             border: none;
@@ -89,18 +96,12 @@
             font-family: inherit;
             font-size: inherit;
             font-weight: inherit;
-            width: 2.8ch; /* Width for HH:MM */
+            width: 5ch; /* Enough width for HH:MM */
             text-align: right;
             outline: none;
-            caret-color: transparent; /* We make our own custom cursor */
+            caret-color: transparent; 
             padding: 0;
             margin: 0;
-        }
-
-        .static-seconds {
-            opacity: 0.5;
-            color: var(--text-dim);
-            pointer-events: none;
         }
 
         .helper-text {
@@ -112,7 +113,7 @@
             opacity: 0.7;
         }
 
-        /* Custom Blinking Cursor Effect */
+        /* Custom Blinking Cursor */
         input.caret-active {
             border-right: 4px solid var(--text-gold);
             animation: blink 1s step-end infinite;
@@ -120,16 +121,19 @@
 
         @keyframes blink { 50% { border-color: transparent; } }
 
-        /* Mobile Responsiveness */
+        /* Responsive Scaling */
         @media (max-width: 768px) {
             body { flex-direction: column; }
             .panel-left { border-right: none; border-bottom: 1px solid var(--border); }
-            .clock-digits { font-size: 18vw; } /* Scales with screen width on mobile */
+            
+            /* Use VW units on mobile so it fits no matter what */
+            .time-main { font-size: 18vw; }
+            .time-seconds { font-size: 9vw; }
         }
         
-        /* Large Desktop Scaling */
         @media (min-width: 1400px) {
-            .clock-digits { font-size: 10rem; }
+            .time-main { font-size: 11rem; }
+            .time-seconds { font-size: 5.5rem; }
         }
     </style>
 </head>
@@ -137,31 +141,33 @@
 
     <div class="panel panel-left">
         <h2>Current Time</h2>
-        <div id="current-time" class="clock-digits text-cyan">
-            00:00:00
+        <div class="time-container text-cyan">
+            <span id="clock-main" class="time-main">00:00</span>
+            <span id="clock-seconds" class="time-seconds">00</span>
         </div>
     </div>
 
     <div class="panel panel-right">
         <h2>Target Time</h2>
         
-        <div class="input-wrapper clock-digits text-gold">
+        <div class="time-container text-gold">
             <input 
                 type="text" 
                 id="target-input" 
+                class="time-main"
                 value="16:30" 
                 maxlength="5" 
                 placeholder="--:--"
             />
-            <span class="static-seconds">:00</span>
+            <span class="time-seconds">:00</span>
         </div>
         
-        <div class="helper-text">[Type HHMM to set]</div>
+        <div class="helper-text">[Type HHMM]</div>
     </div>
 
     <script>
         /* ----------------------------------------------------------------
-           LOGIC: Clock & Input Handling (Same as before)
+           LOGIC
         ---------------------------------------------------------------- */
 
         // 1. Current Time Clock
@@ -171,7 +177,9 @@
             const minutes = String(now.getMinutes()).padStart(2, '0');
             const seconds = String(now.getSeconds()).padStart(2, '0');
             
-            document.getElementById('current-time').textContent = `${hours}:${minutes}:${seconds}`;
+            // Update the two separate parts
+            document.getElementById('clock-main').textContent = `${hours}:${minutes}`;
+            document.getElementById('clock-seconds').textContent = seconds; // Removed colon for cleaner look
         }
         
         updateClock();
@@ -208,7 +216,6 @@
             input.classList.add('caret-active');
         });
         
-        // Initial focus state check
         if(document.activeElement === input) {
             input.classList.add('caret-active');
         }
