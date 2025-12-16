@@ -9,13 +9,12 @@
     
     <style>
         :root {
-            /* Colors */
-            --bg-darker: #020617;  /* slate-950 */
-            --bg-dark:   #0f172a;  /* slate-900 */
-            --border:    #1e293b;  /* slate-800 */
-            --text-dim:  #64748b;  /* slate-500 */
-            --text-cyan: #22d3ee;  /* cyan-400 */
-            --text-gold: #facc15;  /* yellow-400 */
+            --bg-darker: #020617; 
+            --bg-dark:   #0f172a; 
+            --border:    #1e293b; 
+            --text-dim:  #64748b; 
+            --text-cyan: #22d3ee; 
+            --text-gold: #facc15; 
             
             --font-mono: 'JetBrains Mono', monospace;
             --font-ui:   'Inter', sans-serif;
@@ -34,17 +33,12 @@
             display: flex;
         }
 
-        /* Layout */
+        /* Panels share space equally */
         .panel {
             flex: 1;
             display: flex;
-            flex-direction: column;
-            /* CHANGE: Removed justify-content: center to stop vertical drifting */
-            align-items: center; 
-            
-            /* CHANGE: This anchors the content to a fixed visual line (optical center) */
-            padding-top: 35vh; 
-            
+            align-items: center;     /* Vertically centers the wrapper */
+            justify-content: center; /* Horizontally centers the wrapper */
             position: relative;
         }
 
@@ -57,6 +51,15 @@
             background-color: var(--bg-dark);
         }
 
+        /* Wrapper ensures the Label and Time are treated as a single 
+           block for centering purposes, preventing drift.
+        */
+        .content-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Centers text horizontally */
+        }
+
         /* Typography */
         h2 {
             font-size: 0.875rem;
@@ -65,36 +68,33 @@
             letter-spacing: 0.15em;
             font-weight: 600;
             margin: 0 0 2rem 0; 
-            /* CHANGE: Ensure line-height is consistent */
-            line-height: 1.5;
+            line-height: 1;
+            /* Fixed height ensures labels don't jump if fonts load differently */
+            height: 1rem; 
         }
 
-        /* Time Container handles the flex alignment of Big Time + Small Seconds */
         .time-container {
             display: flex;
-            align-items: baseline; /* Ensures numbers sit on same line */
-            justify-content: center; /* Ensures numbers are centered relative to the label */
+            align-items: baseline; 
             font-family: var(--font-mono);
             font-weight: 700;
             font-variant-numeric: tabular-nums;
             line-height: 1;
         }
 
-        /* The Big Numbers (HH:MM) */
         .time-main {
             font-size: 8rem; 
         }
 
-        /* The Small Seconds (SS) */
         .time-seconds {
-            font-size: 4rem; /* Half the size of main time */
-            margin-left: 0.1ch;
+            font-size: 4rem; 
+            margin-left: 1rem; /* Added spacing to replace the colon */
         }
 
         .text-cyan { color: var(--text-cyan); }
         .text-gold { color: var(--text-gold); }
 
-        /* Input Styling */
+        /* Input Styling - Stripped to match SPAN exactly */
         input {
             background: transparent;
             border: none;
@@ -102,23 +102,20 @@
             font-family: inherit;
             font-size: inherit;
             font-weight: inherit;
-            width: 5ch; /* Enough width for HH:MM */
+            line-height: 1;      /* Crucial for alignment */
+            padding: 0;
+            margin: 0;
+            width: 5ch;
             text-align: right;
             outline: none;
             caret-color: transparent; 
-            padding: 0;
-            margin: 0;
-            /* CHANGE: Reset display to block-level behavior inside flex to prevent baseline shifts */
-            display: block; 
         }
 
-        /* Placeholder styling */
         ::placeholder {
             color: var(--text-gold);
             opacity: 0.3;
         }
 
-        /* Custom Blinking Cursor */
         input.caret-active {
             border-right: 4px solid var(--text-gold);
             animation: blink 1s step-end infinite;
@@ -131,10 +128,6 @@
             body { flex-direction: column; }
             .panel-left { border-right: none; border-bottom: 1px solid var(--border); }
             
-            /* ADJUSTMENT: Recalculate vertical anchor for mobile */
-            .panel { padding-top: 0; justify-content: center; } 
-
-            /* Use VW units on mobile so it fits no matter what */
             .time-main { font-size: 18vw; }
             .time-seconds { font-size: 9vw; }
         }
@@ -148,34 +141,33 @@
 <body>
 
     <div class="panel panel-left">
-        <h2>Current Time</h2>
-        <div class="time-container text-cyan">
-            <span id="clock-main" class="time-main">00:00</span>
-            <span id="clock-seconds" class="time-seconds">00</span>
+        <div class="content-wrapper">
+            <h2>Current Time</h2>
+            <div class="time-container text-cyan">
+                <span id="clock-main" class="time-main">00:00</span>
+                <span id="clock-seconds" class="time-seconds">00</span>
+            </div>
         </div>
     </div>
 
     <div class="panel panel-right">
-        <h2>Target Time</h2>
-        
-        <div class="time-container text-gold">
-            <input 
-                type="text" 
-                id="target-input" 
-                class="time-main"
-                value="" 
-                maxlength="5" 
-                placeholder="--:--"
-            />
-            <span class="time-seconds">:00</span>
+        <div class="content-wrapper">
+            <h2>Target Time</h2>
+            <div class="time-container text-gold">
+                <input 
+                    type="text" 
+                    id="target-input" 
+                    class="time-main"
+                    value="" 
+                    maxlength="5" 
+                    placeholder="--:--"
+                />
+                <span class="time-seconds">00</span>
+            </div>
         </div>
     </div>
 
     <script>
-        /* ----------------------------------------------------------------
-           LOGIC
-        ---------------------------------------------------------------- */
-
         // 1. Current Time Clock
         function updateClock() {
             const now = new Date();
@@ -193,7 +185,6 @@
         // 2. Target Input Logic
         const input = document.getElementById('target-input');
 
-        // Auto-insert colon while typing
         input.addEventListener('input', function(e) {
             let val = e.target.value.replace(/[^0-9]/g, '');
             if (val.length > 2) {
@@ -202,14 +193,12 @@
             e.target.value = val.slice(0, 5);
         });
 
-        // Handle Escape Key to remove focus/cursor
         input.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 input.blur(); 
             }
         });
 
-        // Validate and format on blur (losing focus)
         input.addEventListener('blur', function(e) {
             input.classList.remove('caret-active');
             let val = e.target.value;
@@ -226,12 +215,10 @@
             }
         });
 
-        // Add blinking cursor on focus
         input.addEventListener('focus', function() {
             input.classList.add('caret-active');
         });
         
-        // Initial check
         if(document.activeElement === input) {
             input.classList.add('caret-active');
         }
