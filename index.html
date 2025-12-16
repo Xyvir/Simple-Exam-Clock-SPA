@@ -104,7 +104,7 @@
             margin: 0;
         }
 
-        /* Placeholder styling to ensure it looks subtle */
+        /* Placeholder styling */
         ::placeholder {
             color: var(--text-gold);
             opacity: 0.3;
@@ -182,6 +182,7 @@
         // 2. Target Input Logic
         const input = document.getElementById('target-input');
 
+        // Auto-insert colon while typing
         input.addEventListener('input', function(e) {
             let val = e.target.value.replace(/[^0-9]/g, '');
             if (val.length > 2) {
@@ -190,6 +191,14 @@
             e.target.value = val.slice(0, 5);
         });
 
+        // Handle Escape Key to remove focus/cursor
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                input.blur(); 
+            }
+        });
+
+        // Validate and format on blur (losing focus)
         input.addEventListener('blur', function(e) {
             input.classList.remove('caret-active');
             let val = e.target.value;
@@ -206,10 +215,12 @@
             }
         });
 
+        // Add blinking cursor on focus
         input.addEventListener('focus', function() {
             input.classList.add('caret-active');
         });
         
+        // Initial check
         if(document.activeElement === input) {
             input.classList.add('caret-active');
         }
