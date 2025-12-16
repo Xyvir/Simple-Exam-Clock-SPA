@@ -14,7 +14,10 @@
             --border:    #1e293b; 
             --text-dim:  #64748b; 
             --text-cyan: #22d3ee; 
-            --text-gold: #facc15; 
+            
+            /* New Colors */
+            --text-orange: #fb923c; /* Bright Orange for Labels */
+            --text-lime:   #bef264; /* Key Lime Green for Target Clock */
             
             --font-mono: 'JetBrains Mono', monospace;
             --font-ui:   'Inter', sans-serif;
@@ -33,12 +36,11 @@
             display: flex;
         }
 
-        /* Panels share space equally */
         .panel {
             flex: 1;
             display: flex;
-            align-items: center;     /* Vertically centers the wrapper */
-            justify-content: center; /* Horizontally centers the wrapper */
+            align-items: center;     
+            justify-content: center; 
             position: relative;
         }
 
@@ -51,26 +53,27 @@
             background-color: var(--bg-dark);
         }
 
-        /* Wrapper ensures the Label and Time are treated as a single 
-           block for centering purposes, preventing drift.
-        */
         .content-wrapper {
             display: flex;
             flex-direction: column;
-            align-items: center; /* Centers text horizontally */
+            align-items: center; 
         }
 
         /* Typography */
         h2 {
             font-size: 0.875rem;
-            color: var(--text-dim);
+            color: var(--text-orange); /* Changed to Orange */
             text-transform: uppercase;
             letter-spacing: 0.15em;
             font-weight: 600;
             margin: 0 0 2rem 0; 
             line-height: 1;
-            /* Fixed height ensures labels don't jump if fonts load differently */
             height: 1rem; 
+        }
+
+        /* Scalable Manual Alignment Fix */
+        .panel-right h2 {
+            transform: translateY(1.5em);
         }
 
         .time-container {
@@ -88,13 +91,12 @@
 
         .time-seconds {
             font-size: 4rem; 
-            margin-left: 1rem; /* Added spacing to replace the colon */
+            margin-left: 1rem; 
         }
 
         .text-cyan { color: var(--text-cyan); }
-        .text-gold { color: var(--text-gold); }
+        .text-lime { color: var(--text-lime); } /* New class for Lime */
 
-        /* Input Styling - Stripped to match SPAN exactly */
         input {
             background: transparent;
             border: none;
@@ -102,7 +104,7 @@
             font-family: inherit;
             font-size: inherit;
             font-weight: inherit;
-            line-height: 1;      /* Crucial for alignment */
+            line-height: 1;
             padding: 0;
             margin: 0;
             width: 5ch;
@@ -112,12 +114,12 @@
         }
 
         ::placeholder {
-            color: var(--text-gold);
+            color: var(--text-lime); /* Placeholder matches Lime theme */
             opacity: 0.3;
         }
 
         input.caret-active {
-            border-right: 4px solid var(--text-gold);
+            border-right: 4px solid var(--text-lime); /* Cursor matches Lime theme */
             animation: blink 1s step-end infinite;
         }
 
@@ -153,7 +155,7 @@
     <div class="panel panel-right">
         <div class="content-wrapper">
             <h2>Target Time</h2>
-            <div class="time-container text-gold">
+            <div class="time-container text-lime">
                 <input 
                     type="text" 
                     id="target-input" 
@@ -194,7 +196,7 @@
         });
 
         input.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
+            if (e.key === 'Escape' || e.key === 'Enter') {
                 input.blur(); 
             }
         });
