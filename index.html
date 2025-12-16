@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focus Clock</title>
+    <style>
+        :root {
+            --bg-color: #1a1a1a;
+            --text-primary: #e0e0e0;
+            --text-secondary: #888;
+            --accent-current: #64ffda; /* Soft cyan */
+            --accent-target: #ffd700;  /* Soft gold */
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            overflow: hidden;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .pane {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Divider Line */
+        .pane:first-child {
+            border-right: 2px solid #333;
+        }
+
+        .label {
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .time-display {
+            font-size: 12vw; /* Scales with screen width */
+            font-weight: 700;
+            font-variant-numeric: tabular-nums; /* Prevents jitter */
+            line-height: 1;
+        }
+
+        /* Specific Colors */
+        #current-pane .time-display {
+            color: var(--accent-current);
+        }
+
+        #target-pane .time-display {
+            color: var(--accent-target);
+        }
+
+        /* Input Styling */
+        input[type="time"] {
+            background: transparent;
+            border: none;
+            color: var(--accent-target);
+            font-family: inherit;
+            font-size: 12vw;
+            font-weight: 700;
+            text-align: center;
+            outline: none;
+            width: 100%;
+            cursor: pointer;
+        }
+
+        /* Remove browser default time picker indicator to keep it clean */
+        input[type="time"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            opacity: 0.1;
+            cursor: pointer;
+        }
+        
+        /* Overtime indicator (subtle) */
+        .overtime {
+            opacity: 0.5; /* Dims the target if passed */
+        }
+
+        /* Mobile adjustment */
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                grid-template-rows: 1fr 1fr;
+            }
+            .pane:first-child {
+                border-right: none;
+                border-bottom: 2px solid #333;
+            }
+            .time-display, input[type="time"] {
+                font-size: 18vw;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="pane" id="current-pane">
+            <div class="label">Current Time</div>
+            <div class="time-display" id="clock">00:00</div>
+        </div>
+
+        <div class="pane" id="target-pane">
+            <div class="label">Target Time</div>
+            <input type="time" id="target-input">
+        </div>
+    </div>
+
+    <script>
+        const clockEl = document.getElementById('clock');
+        const targetInput = document.getElementById('target-input');
+        const targetPane = document.getElementById('target-pane');
+
+        function updateClock() {
+            const now = new Date();
+            
+            // Format time as HH:MM:SS (12-hour format preference logic included)
+            let hours = now.getHours();
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            
+            // Optional: 12-hour format conversion
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            const hours12 = hours % 12 || 12; 
+            
+            // Display string
+            clockEl.textContent = `${hours12}:${minutes}:${seconds}`;
+            
+            checkTarget(now);
+        }
+
+        function checkTarget(now) {
+            if (!targetInput.value) return;
+
+            // Parse target time
+            const [tHours, tMinutes] = targetInput.value.split(':');
+            const targetDate = new Date();
+            targetDate.setHours(parseInt(tHours), parseInt(tMinutes), 0);
+
+            // Subtle indicator if we are past the target time
+            // (Simply dims the target side, no alarms)
+            if (now > targetDate) {
+                targetPane.classList.add('overtime');
+            } else {
+                targetPane.classList.remove('overtime');
+            }
+        }
+
+        // Initialize
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Focus logic: Pressing Enter on the input blurs it to remove focus ring
+        targetInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') targetInput.blur();
+        });
+
+    </script>
+</body>
+</html>
